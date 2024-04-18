@@ -171,7 +171,7 @@ export class DLMM {
     opt?: Opt
   ): Promise<DLMM> {
     const cluster = opt?.cluster || "mainnet-beta";
-
+    console.log("inside createee2!");
     const provider = new AnchorProvider(
       connection,
       {} as any,
