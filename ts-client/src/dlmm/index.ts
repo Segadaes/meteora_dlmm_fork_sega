@@ -267,7 +267,7 @@ export class DLMM {
   static async create_with_no_connection(
     dlmm: PublicKey,
     binArrayBitmapExtension?: BinArrayBitmapExtensionAccount | null,
-    lbPairAccInfo?: LbPair,
+    lbPairAccInfo?: any,
     tokenX?: any,
     tokenY?: any,
   ): Promise<DLMM> {
