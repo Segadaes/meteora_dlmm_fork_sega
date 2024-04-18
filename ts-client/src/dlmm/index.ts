@@ -251,7 +251,7 @@ export class DLMM {
       amount: reserveYBalance.amount,
       decimal: tokenYDecimal,
     };
-    console.log(`dlmm: ${JSON.stringify(dlmm, null, 2)}, program: ${program}, lbPairAccInfo: ${JSON.stringify(lbPairAccInfo, null, 2)}, binArrayBitmapExtension: ${JSON.stringify(binArrayBitmapExtension, null, 2)}, tokenX: ${JSON.stringify(tokenX, null ,2)}, tokenY: ${JSON.stringify(tokenY, null ,2)}, opt: ${JSON.stringify(opt, null, 2)}`);
+    console.log(`dlmm: ${JSON.stringify(dlmm, null, 2)}, program: ${program}, lbPairAccInfo: ${JSON.stringify(lbPairAccInfo, null, 2)}, binArrayBitmapExtension: ${binArrayBitmapExtension}, tokenX: ${tokenX}, tokenY: ${tokenY}, opt: ${opt}`);
 
     return new DLMM(
       dlmm,
