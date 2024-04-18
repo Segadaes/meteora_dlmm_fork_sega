@@ -281,6 +281,16 @@ export class DLMM {
     );
   }
 
+  static async deriveBinArrayBitmapExtensionNew(
+    lbPair: PublicKey,
+    programId: PublicKey
+  ) {
+    return PublicKey.findProgramAddressSync(
+      [Buffer.from("bitmap"), lbPair.toBytes()],
+      programId
+    );
+  }
+
   /**
    * Similar to `create` function, but it accept multiple lbPairs to be initialized.
    * @param {Connection} connection - The `connection` parameter is an instance of the `Connection`
