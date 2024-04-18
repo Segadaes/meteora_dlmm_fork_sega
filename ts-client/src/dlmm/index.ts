@@ -266,6 +266,7 @@ export class DLMM {
 
   public async create_with_no_connection(
     dlmm: PublicKey,
+    program: any,
     binArrayBitmapExtension?: any | null,
     lbPairAccInfo?: any,
     tokenX?: any,
@@ -274,6 +275,7 @@ export class DLMM {
     console.log("inside createee new!"); 
     return new DLMM(
       dlmm,
+      program,
       lbPairAccInfo,
       binArrayBitmapExtension,
       tokenX,
@@ -289,6 +291,85 @@ export class DLMM {
       [Buffer.from("bitmap"), lbPair.toBytes()],
       programId
     );
+  }
+
+  public async getAllDataToCreateDlmm(
+    connection: Connection,
+    dlmm: PublicKey,
+  ) {
+    const cluster = "mainnet-beta";
+    console.log("inside getLbPairAccInfo!");
+    const provider = new AnchorProvider(
+      connection,
+      {} as any,
+      AnchorProvider.defaultOptions()
+    );
+    const program = new Program(IDL, LBCLMM_PROGRAM_IDS[cluster], provider);
+
+    const binArrayBitMapExtensionPubkey = deriveBinArrayBitmapExtension(
+      dlmm,
+      program.programId
+    )[0];
+    const accountsToFetch = [dlmm, binArrayBitMapExtensionPubkey];
+
+    const accountsInfo = await chunkedGetMultipleAccountInfos(
+      connection,
+      accountsToFetch
+    );
+    const lbPairAccountInfoBuffer = accountsInfo[0]?.data;
+    if (!lbPairAccountInfoBuffer)
+      throw new Error(`LB Pair account ${dlmm.toBase58()} not found`);
+    const lbPairAccInfo: LbPair = program.coder.accounts.decode(
+      "lbPair",
+      lbPairAccountInfoBuffer
+    );
+    const binArrayBitMapAccountInfoBuffer = accountsInfo[1]?.data;
+    let binArrayBitMapExtensionAccInfo: BinArrayBitmapExtension | null = null;
+    if (binArrayBitMapAccountInfoBuffer) {
+      binArrayBitMapExtensionAccInfo = program.coder.accounts.decode(
+        "binArrayBitmapExtension",
+        binArrayBitMapAccountInfoBuffer
+      );
+    }
+
+    const reserveAccountsInfo = await chunkedGetMultipleAccountInfos(
+      program.provider.connection,
+      [
+        lbPairAccInfo.reserveX,
+        lbPairAccInfo.reserveY,
+        lbPairAccInfo.tokenXMint,
+        lbPairAccInfo.tokenYMint,
+      ]
+    );
+    let binArrayBitmapExtension: BinArrayBitmapExtensionAccount | null;
+    if (binArrayBitMapExtensionAccInfo) {
+      binArrayBitmapExtension = {
+        account: binArrayBitMapExtensionAccInfo,
+        publicKey: binArrayBitMapExtensionPubkey,
+      };
+    }
+
+    const reserveXBalance = AccountLayout.decode(reserveAccountsInfo[0].data);
+    const reserveYBalance = AccountLayout.decode(reserveAccountsInfo[1].data);
+    const tokenXDecimal = MintLayout.decode(
+      reserveAccountsInfo[2].data
+    ).decimals;
+    const tokenYDecimal = MintLayout.decode(
+      reserveAccountsInfo[3].data
+    ).decimals;
+    const tokenX = {
+      publicKey: lbPairAccInfo.tokenXMint,
+      reserve: lbPairAccInfo.reserveX,
+      amount: reserveXBalance.amount,
+      decimal: tokenXDecimal,
+    };
+    const tokenY = {
+      publicKey: lbPairAccInfo.tokenYMint,
+      reserve: lbPairAccInfo.reserveY,
+      amount: reserveYBalance.amount,
+      decimal: tokenYDecimal,
+    };    
+    return [dlmm, program, binArrayBitmapExtension, lbPairAccInfo, tokenX, tokenY];
   }
 
   /**
