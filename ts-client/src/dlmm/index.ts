@@ -116,13 +116,22 @@ type Opt = {
 };
 
 export class DLMM {
+  // constructor(
+  //   public pubkey: PublicKey,
+  //   public program: ClmmProgram,
+  //   public lbPair: LbPair,
+  //   public binArrayBitmapExtension: BinArrayBitmapExtensionAccount | null,
+  //   public tokenX: TokenReserve,
+  //   public tokenY: TokenReserve,
+  //   private opt?: Opt
+  // ) {}
   constructor(
     public pubkey: PublicKey,
-    public program: ClmmProgram,
-    public lbPair: LbPair,
-    public binArrayBitmapExtension: BinArrayBitmapExtensionAccount | null,
-    public tokenX: TokenReserve,
-    public tokenY: TokenReserve,
+    public program?: ClmmProgram,
+    public lbPair?: LbPair,
+    public binArrayBitmapExtension?: BinArrayBitmapExtensionAccount | null,
+    public tokenX?: TokenReserve,
+    public tokenY?: TokenReserve,
     private opt?: Opt
   ) {}
 
@@ -242,6 +251,8 @@ export class DLMM {
       amount: reserveYBalance.amount,
       decimal: tokenYDecimal,
     };
+    console.log(`dlmm: ${JSON.stringify(dlmm, null, 2)}, program: ${program}, lbPairAccInfo: ${JSON.stringify(lbPairAccInfo, null, 2)}, binArrayBitmapExtension: ${JSON.stringify(binArrayBitmapExtension, null, 2)}, tokenX: ${JSON.stringify(tokenX, null ,2)}, tokenY: ${JSON.stringify(tokenY, null ,2)}, opt: ${JSON.stringify(opt, null, 2)}`);
+
     return new DLMM(
       dlmm,
       program,
@@ -250,6 +261,23 @@ export class DLMM {
       tokenX,
       tokenY,
       opt
+    );
+  }
+
+  static async create_with_no_connection(
+    dlmm: PublicKey,
+    binArrayBitmapExtension?: BinArrayBitmapExtensionAccount | null,
+    lbPairAccInfo?: LbPair,
+    tokenX?: any,
+    tokenY?: any,
+  ): Promise<DLMM> {
+    console.log("inside createee new!"); 
+    return new DLMM(
+      dlmm,
+      lbPairAccInfo,
+      binArrayBitmapExtension,
+      tokenX,
+      tokenY,
     );
   }
 
