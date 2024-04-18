@@ -264,7 +264,7 @@ export class DLMM {
     );
   }
 
-  static async create_with_no_connection(
+  public async create_with_no_connection(
     dlmm: PublicKey,
     binArrayBitmapExtension?: any | null,
     lbPairAccInfo?: any,
@@ -281,7 +281,7 @@ export class DLMM {
     );
   }
 
-  static async deriveBinArrayBitmapExtensionNew(
+  public async deriveBinArrayBitmapExtensionNew(
     lbPair: PublicKey,
     programId: PublicKey
   ) {
