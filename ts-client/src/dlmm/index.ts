@@ -264,7 +264,7 @@ export class DLMM {
     );
   }
 
-  public async create_with_no_connection(
+  static async create_with_no_connection(
     dlmm: any,
     program: any,
     binArrayBitmapExtension?: any | null,
