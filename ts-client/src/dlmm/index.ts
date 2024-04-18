@@ -265,7 +265,7 @@ export class DLMM {
   }
 
   public async create_with_no_connection(
-    dlmm: PublicKey,
+    dlmm: any,
     program: any,
     binArrayBitmapExtension?: any | null,
     lbPairAccInfo?: any,
