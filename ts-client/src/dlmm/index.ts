@@ -180,7 +180,7 @@ export class DLMM {
     opt?: Opt
   ): Promise<DLMM> {
     const cluster = opt?.cluster || "mainnet-beta";
-    console.log("inside createee3!");
+    // console.log("inside createee3!");
     const provider = new AnchorProvider(
       connection,
       {} as any,
@@ -251,7 +251,7 @@ export class DLMM {
       amount: reserveYBalance.amount,
       decimal: tokenYDecimal,
     };
-    console.log(`dlmm: ${JSON.stringify(dlmm, null, 2)}, program: ${program}, lbPairAccInfo: ${JSON.stringify(lbPairAccInfo, null, 2)}, binArrayBitmapExtension: ${binArrayBitmapExtension}, tokenX: ${tokenX}, tokenY: ${tokenY}, opt: ${opt}`);
+    // console.log(`dlmm: ${JSON.stringify(dlmm, null, 2)}, program: ${program}, lbPairAccInfo: ${JSON.stringify(lbPairAccInfo, null, 2)}, binArrayBitmapExtension: ${binArrayBitmapExtension}, tokenX: ${tokenX}, tokenY: ${tokenY}, opt: ${opt}`);
 
     return new DLMM(
       dlmm,
@@ -272,7 +272,7 @@ export class DLMM {
     tokenX?: any,
     tokenY?: any,
   ): Promise<DLMM> {
-    console.log("inside createee new!"); 
+    // console.log("inside createee new!"); 
     return new DLMM(
       dlmm,
       program,
