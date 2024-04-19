@@ -1275,7 +1275,7 @@ export class DLMM {
     this.lbPair = lbPairState;
   }
 
-  public async refetchStatesNoConnection(
+  public refetchStatesNoConnection(
     lbPairAccountInfo: any,
     binArrayBitmapExtensionAccountInfo: any,
     reserveXAccountInfo: any,
@@ -1283,7 +1283,7 @@ export class DLMM {
     binArrayBitmapExtensionPubkey: any,
     tokenXDecimal: any,
     tokenYDecimal: any
-  ): Promise<void> {
+  ) {
     // const binArrayBitmapExtensionPubkey = deriveBinArrayBitmapExtension(
     //   this.pubkey,
     //   this.program.programId
