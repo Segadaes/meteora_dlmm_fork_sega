@@ -1275,6 +1275,78 @@ export class DLMM {
     this.lbPair = lbPairState;
   }
 
+  public async refetchStatesNoConnection(
+    lbPairAccountInfo: any,
+    binArrayBitmapExtensionAccountInfo: any,
+    reserveXAccountInfo: any,
+    reserveYAccountInfo: any,
+    binArrayBitmapExtensionPubkey: any,
+    tokenXDecimal: any,
+    tokenYDecimal: any
+  ): Promise<void> {
+    // const binArrayBitmapExtensionPubkey = deriveBinArrayBitmapExtension(
+    //   this.pubkey,
+    //   this.program.programId
+    // )[0];
+    // const [
+    //   lbPairAccountInfo,
+    //   binArrayBitmapExtensionAccountInfo,
+    //   reserveXAccountInfo,
+    //   reserveYAccountInfo,
+    // ] = await chunkedGetMultipleAccountInfos(this.program.provider.connection, [
+    //   this.pubkey,
+    //   binArrayBitmapExtensionPubkey,
+    //   this.lbPair.reserveX,
+    //   this.lbPair.reserveY,
+    // ]);
+
+    const lbPairState = this.program.coder.accounts.decode(
+      "lbPair",
+      lbPairAccountInfo.data
+    );
+    if (binArrayBitmapExtensionAccountInfo) {
+      const binArrayBitmapExtensionState = this.program.coder.accounts.decode(
+        "binArrayBitmapExtension",
+        binArrayBitmapExtensionAccountInfo.data
+      );
+
+      if (binArrayBitmapExtensionState) {
+        this.binArrayBitmapExtension = {
+          account: binArrayBitmapExtensionState,
+          publicKey: binArrayBitmapExtensionPubkey,
+        };
+      }
+    }
+
+    const reserveXBalance = AccountLayout.decode(reserveXAccountInfo.data);
+    const reserveYBalance = AccountLayout.decode(reserveYAccountInfo.data);
+    // const [tokenXDecimal, tokenYDecimal] = await Promise.all([
+    //   getTokenDecimals(
+    //     this.program.provider.connection,
+    //     lbPairState.tokenXMint
+    //   ),
+    //   getTokenDecimals(
+    //     this.program.provider.connection,
+    //     lbPairState.tokenYMint
+    //   ),
+    // ]);
+
+    this.tokenX = {
+      amount: reserveXBalance.amount,
+      decimal: tokenXDecimal,
+      publicKey: lbPairState.tokenXMint,
+      reserve: lbPairState.reserveX,
+    };
+    this.tokenY = {
+      amount: reserveYBalance.amount,
+      decimal: tokenYDecimal,
+      publicKey: lbPairState.tokenYMint,
+      reserve: lbPairState.reserveY,
+    };
+
+    this.lbPair = lbPairState;
+  }
+
   /**
    * The function `getBinArrays` returns an array of `BinArrayAccount` objects
    * @returns a Promise that resolves to an array of BinArrayAccount objects.
