@@ -1433,6 +1433,69 @@ export class DLMM {
     return binArrays;
   }
 
+  public async getBinArrayForSwapNoRefetch(
+    swapForY,
+    count = 4
+  ): Promise<BinArrayAccount[]> {
+    // await this.refetchStates();
+
+    const binArraysPubkey = new Set<string>();
+
+    let shouldStop = false;
+    let activeIdToLoop = this.lbPair.activeId;
+
+    while (!shouldStop) {
+      const binArrayIndex = findNextBinArrayIndexWithLiquidity(
+        swapForY,
+        new BN(activeIdToLoop),
+        this.lbPair,
+        this.binArrayBitmapExtension?.account ?? null
+      );
+      if (binArrayIndex === null) shouldStop = true;
+      else {
+        const [binArrayPubKey] = deriveBinArray(
+          this.pubkey,
+          binArrayIndex,
+          this.program.programId
+        );
+        binArraysPubkey.add(binArrayPubKey.toBase58());
+
+        const [lowerBinId, upperBinId] =
+          getBinArrayLowerUpperBinId(binArrayIndex);
+        activeIdToLoop = swapForY
+          ? lowerBinId.toNumber() - 1
+          : upperBinId.toNumber() + 1;
+      }
+
+      if (binArraysPubkey.size === count) shouldStop = true;
+    }
+
+    const accountsToFetch = Array.from(binArraysPubkey).map(
+      (pubkey) => new PublicKey(pubkey)
+    );
+
+    const binArraysAccInfoBuffer = await chunkedGetMultipleAccountInfos(
+      this.program.provider.connection,
+      accountsToFetch
+    );
+
+    const binArrays: BinArrayAccount[] = await Promise.all(
+      binArraysAccInfoBuffer.map(async (accInfo, idx) => {
+        const account: BinArray = this.program.coder.accounts.decode(
+          "binArray",
+          accInfo.data
+        );
+        const publicKey = accountsToFetch[idx];
+        return {
+          account,
+          publicKey,
+        };
+      })
+    );
+
+    return binArrays;
+  }
+
   public static calculateFeeInfo(
     baseFactor: number | string,
     binStep: number | string
