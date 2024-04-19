@@ -264,14 +264,14 @@ export class DLMM {
     );
   }
 
-  static async create_with_no_connection(
+  static create_with_no_connection(
     dlmm: any,
     program: any,
     binArrayBitmapExtension?: any | null,
     lbPairAccInfo?: any,
     tokenX?: any,
     tokenY?: any,
-  ): Promise<DLMM> {
+  ) {
     // console.log("inside createee new!"); 
     return new DLMM(
       dlmm,
