@@ -298,7 +298,7 @@ export class DLMM {
     dlmm: PublicKey,
   ) {
     const cluster = "mainnet-beta";
-    console.log("inside getLbPairAccInfo!");
+    // console.log("inside getLbPairAccInfo!");
     const provider = new AnchorProvider(
       connection,
       {} as any,
