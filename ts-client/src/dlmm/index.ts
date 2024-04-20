@@ -1253,6 +1253,7 @@ export class DLMM {
         };
       }
     }
+    console.log(`this.binArrayBitmapExtension: ${this.binArrayBitmapExtension}`);
 
     const reserveXBalance = AccountLayout.decode(reserveXAccountInfo.data);
     const reserveYBalance = AccountLayout.decode(reserveYAccountInfo.data);
