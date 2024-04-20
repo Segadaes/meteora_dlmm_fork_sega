@@ -1252,8 +1252,7 @@ export class DLMM {
           publicKey: binArrayBitmapExtensionPubkey,
         };
       }
-    }
-    console.log(`this.binArrayBitmapExtension: ${this.binArrayBitmapExtension}`);
+    }    
 
     const reserveXBalance = AccountLayout.decode(reserveXAccountInfo.data);
     const reserveYBalance = AccountLayout.decode(reserveYAccountInfo.data);
@@ -1325,6 +1324,7 @@ export class DLMM {
         };
       }
     }
+    console.log(`this.binArrayBitmapExtension: ${this.binArrayBitmapExtension}`);
 
     if (reserveXAccountInfo) {
       const reserveXBalance = AccountLayout.decode(reserveXAccountInfo.data);
