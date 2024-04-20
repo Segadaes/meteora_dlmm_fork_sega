@@ -1324,7 +1324,7 @@ export class DLMM {
         };
       }
     }
-    console.log(`this.binArrayBitmapExtension: ${this.binArrayBitmapExtension}`);
+    // console.log(`this.binArrayBitmapExtension: ${this.binArrayBitmapExtension}`);
 
     if (reserveXAccountInfo) {
       const reserveXBalance = AccountLayout.decode(reserveXAccountInfo.data);
@@ -3427,6 +3427,7 @@ export class DLMM {
           activeId.toNumber(),
           binArrayAccountToSwap.account
         );
+        console.log(`bin: ${JSON.stringify(bin, null, 2)}`);
         const { amountIn, amountOut, fee, protocolFee } = swapQuoteAtBin(
           bin,
           binStep,
