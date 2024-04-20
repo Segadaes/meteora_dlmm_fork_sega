@@ -141,7 +141,7 @@ export class DLMM {
     this.derive_bin_array_bitmap_extension = PublicKey.findProgramAddressSync(
       [Buffer.from("bitmap"), this.lbPair.toBytes()],
       this.program.programId
-    );
+    )[0];
   }
 
   /** Static public method */
