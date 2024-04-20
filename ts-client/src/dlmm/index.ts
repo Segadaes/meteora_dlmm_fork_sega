@@ -125,6 +125,8 @@ export class DLMM {
   //   public tokenY: TokenReserve,
   //   private opt?: Opt
   // ) {}
+  private derive_bin_array_bitmap_extension: PublicKey; 
+
   constructor(
     public pubkey: PublicKey,
     public program?: ClmmProgram,
@@ -132,8 +134,15 @@ export class DLMM {
     public binArrayBitmapExtension?: BinArrayBitmapExtensionAccount | null,
     public tokenX?: TokenReserve,
     public tokenY?: TokenReserve,
+    public tokenXDecimal?: any,
+    public tokenYDecimal?: any,
     private opt?: Opt
-  ) {}
+  ) {
+    this.derive_bin_array_bitmap_extension = PublicKey.findProgramAddressSync(
+      [Buffer.from("bitmap"), this.lbPair.toBytes()],
+      this.program.programId
+    );
+  }
 
   /** Static public method */
 
@@ -271,6 +280,8 @@ export class DLMM {
     lbPairAccInfo?: any,
     tokenX?: any,
     tokenY?: any,
+    tokenXDecimal?: any,
+    tokenYDecimal?: any,
   ) {
     // console.log("inside createee new!"); 
     return new DLMM(
@@ -280,17 +291,14 @@ export class DLMM {
       binArrayBitmapExtension,
       tokenX,
       tokenY,
+      tokenXDecimal,
+      tokenYDecimal,
     );
   }
 
-  public async deriveBinArrayBitmapExtensionNew(
-    lbPair: PublicKey,
-    programId: PublicKey
+  public deriveBinArrayBitmapExtensionNew(    
   ) {
-    return PublicKey.findProgramAddressSync(
-      [Buffer.from("bitmap"), lbPair.toBytes()],
-      programId
-    );
+    return this.derive_bin_array_bitmap_extension;
   }
 
   public async getAllDataToCreateDlmm(
@@ -369,7 +377,7 @@ export class DLMM {
       amount: reserveYBalance.amount,
       decimal: tokenYDecimal,
     };    
-    return [dlmm, program, binArrayBitmapExtension, lbPairAccInfo, tokenX, tokenY];
+    return [dlmm, program, binArrayBitmapExtension, lbPairAccInfo, tokenX, tokenY, tokenXDecimal, tokenYDecimal, lbPair, program.programId];
   }
 
   /**
@@ -1276,13 +1284,10 @@ export class DLMM {
   }
 
   public refetchStatesNoConnection(
-    lbPairAccountInfo: any,
-    binArrayBitmapExtensionAccountInfo: any,
-    reserveXAccountInfo: any,
-    reserveYAccountInfo: any,
-    binArrayBitmapExtensionPubkey: any,
-    tokenXDecimal: any,
-    tokenYDecimal: any
+    lbPairAccountInfo?: any,
+    binArrayBitmapExtensionAccountInfo?: any,
+    reserveXAccountInfo?: any,
+    reserveYAccountInfo?: any,
   ) {
     // const binArrayBitmapExtensionPubkey = deriveBinArrayBitmapExtension(
     //   this.pubkey,
@@ -1299,11 +1304,13 @@ export class DLMM {
     //   this.lbPair.reserveX,
     //   this.lbPair.reserveY,
     // ]);
-
-    const lbPairState = this.program.coder.accounts.decode(
-      "lbPair",
-      lbPairAccountInfo.data
-    );
+    
+    if (lbPairAccountInfo) {
+      this.lbPair = this.program.coder.accounts.decode(
+        "lbPair",
+        lbPairAccountInfo.data
+      );
+    }
     if (binArrayBitmapExtensionAccountInfo) {
       const binArrayBitmapExtensionState = this.program.coder.accounts.decode(
         "binArrayBitmapExtension",
@@ -1313,13 +1320,29 @@ export class DLMM {
       if (binArrayBitmapExtensionState) {
         this.binArrayBitmapExtension = {
           account: binArrayBitmapExtensionState,
-          publicKey: binArrayBitmapExtensionPubkey,
+          publicKey: this.derive_bin_array_bitmap_extension,
         };
       }
     }
 
-    const reserveXBalance = AccountLayout.decode(reserveXAccountInfo.data);
-    const reserveYBalance = AccountLayout.decode(reserveYAccountInfo.data);
+    if (reserveXAccountInfo) {
+      const reserveXBalance = AccountLayout.decode(reserveXAccountInfo.data);
+      this.tokenX = {
+        amount: reserveXBalance.amount,
+        decimal: this.tokenXDecimal,
+        publicKey: this.lbPair.tokenXMint,
+        reserve: this.lbPair.reserveX,
+      };
+    }
+    if (reserveYAccountInfo) {
+      const reserveYBalance = AccountLayout.decode(reserveYAccountInfo.data);
+      this.tokenY = {
+        amount: reserveYBalance.amount,
+        decimal: this.tokenYDecimal,
+        publicKey: this.lbPair.tokenYMint,
+        reserve: this.lbPair.reserveY,
+      };
+    }
     // const [tokenXDecimal, tokenYDecimal] = await Promise.all([
     //   getTokenDecimals(
     //     this.program.provider.connection,
@@ -1329,22 +1352,7 @@ export class DLMM {
     //     this.program.provider.connection,
     //     lbPairState.tokenYMint
     //   ),
-    // ]);
-
-    this.tokenX = {
-      amount: reserveXBalance.amount,
-      decimal: tokenXDecimal,
-      publicKey: lbPairState.tokenXMint,
-      reserve: lbPairState.reserveX,
-    };
-    this.tokenY = {
-      amount: reserveYBalance.amount,
-      decimal: tokenYDecimal,
-      publicKey: lbPairState.tokenYMint,
-      reserve: lbPairState.reserveY,
-    };
-
-    this.lbPair = lbPairState;
+    // ]);    
   }
 
   /**
