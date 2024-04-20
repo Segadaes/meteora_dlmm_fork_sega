@@ -139,7 +139,7 @@ export class DLMM {
     private opt?: Opt
   ) {
     this.derive_bin_array_bitmap_extension = PublicKey.findProgramAddressSync(
-      [Buffer.from("bitmap"), this.lbPair.toBytes()],
+      [Buffer.from("bitmap"), this.pubkey.toBytes()],
       this.program.programId
     )[0];
   }
@@ -377,7 +377,7 @@ export class DLMM {
       amount: reserveYBalance.amount,
       decimal: tokenYDecimal,
     };    
-    return [dlmm, program, binArrayBitmapExtension, lbPairAccInfo, tokenX, tokenY, tokenXDecimal, tokenYDecimal, lbPair, program.programId];
+    return [dlmm, program, binArrayBitmapExtension, lbPairAccInfo, tokenX, tokenY, tokenXDecimal, tokenYDecimal];
   }
 
   /**
