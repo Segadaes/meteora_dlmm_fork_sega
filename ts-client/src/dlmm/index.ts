@@ -1473,6 +1473,7 @@ export class DLMM {
     const accountsToFetch = Array.from(binArraysPubkey).map(
       (pubkey) => new PublicKey(pubkey)
     );
+    console.log(`accountsToFetch inside getBinArrayForSwapNoRefetch: ${accountsToFetch}`);
 
     const binArraysAccInfoBuffer = await chunkedGetMultipleAccountInfos(
       this.program.provider.connection,
