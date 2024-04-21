@@ -1372,6 +1372,7 @@ export class DLMM {
       newBinArrays.forEach(binArray => {
         updatedBinArrays[binArray.publicKey.toString()] = binArray;
       });
+      console.log(`updatedBinArrays: ${JSON.stringify(updatedBinArrays, null, 2)}`);
 
       if (!this.binArrays) {
         this.binArrays = [];
