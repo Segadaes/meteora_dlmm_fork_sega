@@ -126,6 +126,7 @@ export class DLMM {
   //   private opt?: Opt
   // ) {}
   private derive_bin_array_bitmap_extension: PublicKey; 
+  private binArrays: BinArrayAccount[];
 
   constructor(
     public pubkey: PublicKey,
@@ -1283,11 +1284,13 @@ export class DLMM {
     this.lbPair = lbPairState;
   }
 
-  public refetchStatesNoConnection(
+  public async refetchStatesNoConnection(
     lbPairAccountInfo?: any,
     binArrayBitmapExtensionAccountInfo?: any,
     reserveXAccountInfo?: any,
     reserveYAccountInfo?: any,
+    binArraysAccInfoBuffer?: any,
+    binArraysAccInfoBufferAccounts?: any
   ) {
     // const binArrayBitmapExtensionPubkey = deriveBinArrayBitmapExtension(
     //   this.pubkey,
@@ -1344,6 +1347,36 @@ export class DLMM {
         reserve: this.lbPair.reserveY,
       };
     }
+    // Update or merge binArrays
+    if (binArraysAccInfoBuffer && binArraysAccInfoBufferAccounts) {
+      // Temporary object to hold updated or new binArrays
+      const updatedBinArrays = {};
+
+      const newBinArrays: BinArrayAccount[] = await Promise.all(
+        binArraysAccInfoBuffer.map(async (accInfo, idx) => {
+          const account: BinArray = this.program.coder.accounts.decode(
+            "binArray",
+            accInfo.data
+          );
+          const publicKey = binArraysAccInfoBufferAccounts[idx];
+          return {
+            account,
+            publicKey,
+          };
+        })
+      );
+
+      // Add new or updated entries to the temporary object
+      newBinArrays.forEach(binArray => {
+        updatedBinArrays[binArray.publicKey.toString()] = binArray;
+      });
+
+      // Merge existing binArrays with new/updated ones
+      this.binArrays = this.binArrays.map(oldBinArray => {
+        return updatedBinArrays[oldBinArray.publicKey.toString()] || oldBinArray;
+      });
+    }
+
     // const [tokenXDecimal, tokenYDecimal] = await Promise.all([
     //   getTokenDecimals(
     //     this.program.provider.connection,
@@ -3406,6 +3439,123 @@ export class DLMM {
         this.lbPair,
         this.binArrayBitmapExtension?.account,
         binArrays
+      );
+
+      if (binArrayAccountToSwap == null) {
+        throw new Error("Insufficient liquidity");
+      }
+
+      binArraysForSwap.set(binArrayAccountToSwap.publicKey, true);
+
+      this.updateVolatilityAccumulator(
+        vParameterClone,
+        sParameters,
+        activeId.toNumber()
+      );
+
+      if (
+        isBinIdWithinBinArray(activeId, binArrayAccountToSwap.account.index)
+      ) {
+        const bin = getBinFromBinArray(
+          activeId.toNumber(),
+          binArrayAccountToSwap.account
+        );
+        console.log(`bin: ${JSON.stringify(bin, null, 2)}`);
+        const { amountIn, amountOut, fee, protocolFee } = swapQuoteAtBin(
+          bin,
+          binStep,
+          sParameters,
+          vParameterClone,
+          inAmountLeft,
+          swapForY
+        );
+
+        if (!amountIn.isZero()) {
+          inAmountLeft = inAmountLeft.sub(amountIn);
+          actualOutAmount = actualOutAmount.add(amountOut);
+          feeAmount = feeAmount.add(fee);
+          protocolFeeAmount = protocolFee.add(protocolFee);
+
+          if (!startBin) {
+            startBin = bin;
+          }
+        }
+      }
+
+      if (!inAmountLeft.isZero()) {
+        if (swapForY) {
+          activeId = activeId.sub(new BN(1));
+        } else {
+          activeId = activeId.add(new BN(1));
+        }
+      }
+    }
+
+    if (!startBin) throw new Error("Invalid start bin");
+
+    const outAmountWithoutSlippage = getOutAmount(
+      startBin,
+      inAmount.sub(
+        computeFeeFromAmount(binStep, sParameters, vParameterClone, inAmount)
+      ),
+      swapForY
+    );
+
+    const priceImpact = new Decimal(actualOutAmount.toString())
+      .sub(new Decimal(outAmountWithoutSlippage.toString()))
+      .div(new Decimal(outAmountWithoutSlippage.toString()))
+      .mul(new Decimal(100));
+
+    const minOutAmount = actualOutAmount
+      .mul(new BN(BASIS_POINT_MAX).sub(allowedSlippage))
+      .div(new BN(BASIS_POINT_MAX));
+
+    return {
+      consumedInAmount: inAmount,
+      outAmount: actualOutAmount,
+      fee: feeAmount,
+      protocolFee: protocolFeeAmount,
+      minOutAmount,
+      priceImpact,
+      binArraysPubkey: [...binArraysForSwap.keys()],
+    };
+  }
+
+  public swapQuoteNew(
+    inAmount: BN,
+    swapForY: boolean,
+    allowedSlippage: BN,
+  ): SwapQuote {
+    // TODO: Should we use onchain clock ? Volatile fee rate is sensitive to time. Caching clock might causes the quoted fee off ...
+    const currentTimestamp = Date.now() / 1000;
+    let inAmountLeft = inAmount;
+
+    let vParameterClone = Object.assign({}, this.lbPair.vParameters);
+    let activeId = new BN(this.lbPair.activeId);
+
+    const binStep = this.lbPair.binStep;
+    const sParameters = this.lbPair.parameters;
+
+    this.updateReference(
+      activeId.toNumber(),
+      vParameterClone,
+      sParameters,
+      currentTimestamp
+    );
+
+    let startBin: Bin | null = null;
+    let binArraysForSwap = new Map();
+    let actualOutAmount: BN = new BN(0);
+    let feeAmount: BN = new BN(0);
+    let protocolFeeAmount: BN = new BN(0);
+
+    while (!inAmountLeft.isZero()) {
+      let binArrayAccountToSwap = findNextBinArrayWithLiquidity(
+        swapForY,
+        activeId,
+        this.lbPair,
+        this.binArrayBitmapExtension?.account,
+        this.binArrays
       );
 
       if (binArrayAccountToSwap == null) {
