@@ -1366,13 +1366,13 @@ export class DLMM {
           };
         })
       );
-      console.log(`newBinArrays: ${JSON.stringify(newBinArrays, null, 2)}`);
+      // console.log(`newBinArrays: ${JSON.stringify(newBinArrays, null, 2)}`);
 
       // Add new or updated entries to the temporary object
       newBinArrays.forEach(binArray => {
         updatedBinArrays[binArray.publicKey.toString()] = binArray;
       });
-      console.log(`updatedBinArrays: ${JSON.stringify(updatedBinArrays, null, 2)}`);
+      // console.log(`updatedBinArrays: ${JSON.stringify(updatedBinArrays, null, 2)}`);
 
       if (!this.binArrays) {
         this.binArrays = newBinArrays;
@@ -1381,7 +1381,7 @@ export class DLMM {
         this.binArrays = this.binArrays.map(oldBinArray => {
           return updatedBinArrays[oldBinArray.publicKey.toString()] || oldBinArray;
         });
-        console.log(`this.binArrays: ${JSON.stringify(this.binArrays, null, 2)}`);
+        // console.log(`this.binArrays: ${JSON.stringify(this.binArrays, null, 2)}`);
       }      
     }
 
