@@ -3751,7 +3751,7 @@ export class DLMM {
     }).add(swapTx);
   }
 
-  public async swapNew(
+  public async swapNew({
     inToken,
     outToken,
     inAmount,
@@ -3759,7 +3759,7 @@ export class DLMM {
     lbPair,
     user,
     binArraysPubkey,
-  ) {
+  }: SwapParams): Promise<Transaction> {
     const { tokenXMint, tokenYMint, reserveX, reserveY, activeId, oracle } =
       await this.program.account.lbPair.fetch(lbPair);
 
