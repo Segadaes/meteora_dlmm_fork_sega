@@ -3759,7 +3759,7 @@ export class DLMM {
     lbPair,
     user,
     binArraysPubkey,
-  }: SwapParams, block_hash_finalized): Promise<Transaction> {
+  }: SwapParams, blockhash, lastValidBlockHeight): Promise<Transaction> {
     const { tokenXMint, tokenYMint, reserveX, reserveY, activeId, oracle } =
       await this.program.account.lbPair.fetch(lbPair);
 
@@ -3835,10 +3835,10 @@ export class DLMM {
       .postInstructions(postInstructions)
       .transaction();
 
-    const { blockhash, lastValidBlockHeight } =
-      await this.program.provider.connection.getLatestBlockhash("confirmed");
+    // const { blockhash, lastValidBlockHeight } =
+    //   await this.program.provider.connection.getLatestBlockhash("confirmed");
     return new Transaction({
-      block_hash_finalized,
+      blockhash,
       lastValidBlockHeight,
       feePayer: user,
     }).add(swapTx);
