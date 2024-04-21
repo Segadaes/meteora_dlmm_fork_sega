@@ -3759,7 +3759,7 @@ export class DLMM {
     lbPair,
     user,
     binArraysPubkey,
-  }: SwapParams, blockhash, lastValidBlockHeight) {
+  }: SwapParams) {
     const { tokenXMint, tokenYMint, reserveX, reserveY, activeId, oracle } =
       await this.program.account.lbPair.fetch(lbPair);
 
