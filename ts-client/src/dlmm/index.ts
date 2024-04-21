@@ -1371,6 +1371,10 @@ export class DLMM {
         updatedBinArrays[binArray.publicKey.toString()] = binArray;
       });
 
+      if (!this.binArrays) {
+        this.binArrays = [];
+      }
+
       // Merge existing binArrays with new/updated ones
       this.binArrays = this.binArrays.map(oldBinArray => {
         return updatedBinArrays[oldBinArray.publicKey.toString()] || oldBinArray;
