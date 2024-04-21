@@ -1379,6 +1379,7 @@ export class DLMM {
       this.binArrays = this.binArrays.map(oldBinArray => {
         return updatedBinArrays[oldBinArray.publicKey.toString()] || oldBinArray;
       });
+      console.log(`this.binArrays: ${this.binArrays}`);
     }
 
     // const [tokenXDecimal, tokenYDecimal] = await Promise.all([
