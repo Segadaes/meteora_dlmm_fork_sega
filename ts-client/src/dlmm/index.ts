@@ -1375,14 +1375,14 @@ export class DLMM {
       console.log(`updatedBinArrays: ${JSON.stringify(updatedBinArrays, null, 2)}`);
 
       if (!this.binArrays) {
-        this.binArrays = [];
-      }
-
-      // Merge existing binArrays with new/updated ones
-      this.binArrays = this.binArrays.map(oldBinArray => {
-        return updatedBinArrays[oldBinArray.publicKey.toString()] || oldBinArray;
-      });
-      console.log(`this.binArrays: ${JSON.stringify(this.binArrays, null, 2)}`);
+        this.binArrays = newBinArrays;
+      } else {
+        // Merge existing binArrays with new/updated ones
+        this.binArrays = this.binArrays.map(oldBinArray => {
+          return updatedBinArrays[oldBinArray.publicKey.toString()] || oldBinArray;
+        });
+        console.log(`this.binArrays: ${JSON.stringify(this.binArrays, null, 2)}`);
+      }      
     }
 
     // const [tokenXDecimal, tokenYDecimal] = await Promise.all([
