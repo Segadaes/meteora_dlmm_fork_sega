@@ -1349,7 +1349,7 @@ export class DLMM {
     }
     // Update or merge binArrays
     if (binArraysAccInfoBuffer && binArraysAccInfoBufferAccounts) {
-      console.log(`binArraysAccInfoBuffer: ${JSON.stringify(binArraysAccInfoBuffer, null, 2)}`);
+      // console.log(`binArraysAccInfoBuffer: ${JSON.stringify(binArraysAccInfoBuffer, null, 2)}`);
       // Temporary object to hold updated or new binArrays
       const updatedBinArrays = {};
 
@@ -1366,6 +1366,7 @@ export class DLMM {
           };
         })
       );
+      console.log(`newBinArrays: ${JSON.stringify(newBinArrays, null, 2)}`);
 
       // Add new or updated entries to the temporary object
       newBinArrays.forEach(binArray => {
