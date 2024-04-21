@@ -3751,6 +3751,99 @@ export class DLMM {
     }).add(swapTx);
   }
 
+  public async swapNew(
+    inToken,
+    outToken,
+    inAmount,
+    minOutAmount,
+    lbPair,
+    user,
+    binArraysPubkey,
+  ) {
+    const { tokenXMint, tokenYMint, reserveX, reserveY, activeId, oracle } =
+      await this.program.account.lbPair.fetch(lbPair);
+
+    const preInstructions: TransactionInstruction[] = [computeBudgetIx()];
+
+    const [
+      { ataPubKey: userTokenIn, ix: createInTokenAccountIx },
+      { ataPubKey: userTokenOut, ix: createOutTokenAccountIx },
+    ] = await Promise.all([
+      getOrCreateATAInstruction(
+        this.program.provider.connection,
+        inToken,
+        user
+      ),
+      getOrCreateATAInstruction(
+        this.program.provider.connection,
+        outToken,
+        user
+      ),
+    ]);
+    createInTokenAccountIx && preInstructions.push(createInTokenAccountIx);
+    createOutTokenAccountIx && preInstructions.push(createOutTokenAccountIx);
+
+    if (inToken.equals(NATIVE_MINT)) {
+      const wrapSOLIx = wrapSOLInstruction(
+        user,
+        userTokenIn,
+        BigInt(inAmount.toString())
+      );
+
+      preInstructions.push(...wrapSOLIx);
+    }
+
+    const postInstructions: Array<TransactionInstruction> = [];
+    if (outToken.equals(NATIVE_MINT)) {
+      const closeWrappedSOLIx = await unwrapSOLInstruction(user);
+      closeWrappedSOLIx && postInstructions.push(closeWrappedSOLIx);
+    }
+
+    let swapForY = true;
+    if (outToken.equals(tokenXMint)) swapForY = false;
+
+    // TODO: needs some refinement in case binArray not yet initialized
+    const binArrays: AccountMeta[] = binArraysPubkey.map((pubkey) => {
+      return {
+        isSigner: false,
+        isWritable: true,
+        pubkey,
+      };
+    });
+
+    const swapTx = await this.program.methods
+      .swap(inAmount, minOutAmount)
+      .accounts({
+        lbPair,
+        reserveX,
+        reserveY,
+        tokenXMint,
+        tokenYMint,
+        tokenXProgram: TOKEN_PROGRAM_ID, // dont use 2022 first; lack familiarity
+        tokenYProgram: TOKEN_PROGRAM_ID, // dont use 2022 first; lack familiarity
+        user,
+        userTokenIn,
+        userTokenOut,
+        binArrayBitmapExtension: this.binArrayBitmapExtension
+          ? this.binArrayBitmapExtension.publicKey
+          : null,
+        oracle,
+        hostFeeIn: null,
+      })
+      .remainingAccounts(binArrays)
+      .preInstructions(preInstructions)
+      .postInstructions(postInstructions)
+      .transaction();
+
+    const { blockhash, lastValidBlockHeight } =
+      await this.program.provider.connection.getLatestBlockhash("confirmed");
+    return new Transaction({
+      blockhash,
+      lastValidBlockHeight,
+      feePayer: user,
+    }).add(swapTx);
+  }
+
   /**
    * The claimLMReward function is used to claim rewards for a specific position owned by a specific owner.
    * @param
