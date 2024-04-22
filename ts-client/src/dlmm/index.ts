@@ -3468,7 +3468,7 @@ export class DLMM {
           activeId.toNumber(),
           binArrayAccountToSwap.account
         );
-        console.log(`bin: ${JSON.stringify(bin, null, 2)}`);
+        // console.log(`bin: ${JSON.stringify(bin, null, 2)}`);
         const { amountIn, amountOut, fee, protocolFee } = swapQuoteAtBin(
           bin,
           binStep,
@@ -3585,7 +3585,7 @@ export class DLMM {
           activeId.toNumber(),
           binArrayAccountToSwap.account
         );
-        console.log(`bin: ${JSON.stringify(bin, null, 2)}`);
+        // console.log(`bin: ${JSON.stringify(bin, null, 2)}`);
         const { amountIn, amountOut, fee, protocolFee } = swapQuoteAtBin(
           bin,
           binStep,
