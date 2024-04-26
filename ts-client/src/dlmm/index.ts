@@ -1765,6 +1765,11 @@ export class DLMM {
     return activeBinState;
   }
 
+  public async getActiveBinId(): Promise<BinLiquidity> {
+    const { activeId } = await this.program.account.lbPair.fetch(this.pubkey);    
+    return activeId;
+  }
+
   /**
    * The function get the price of a bin based on its bin ID.
    * @param {number} binId - The `binId` parameter is a number that represents the ID of a bin.
