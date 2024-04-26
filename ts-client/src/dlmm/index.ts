@@ -1765,7 +1765,7 @@ export class DLMM {
     return activeBinState;
   }
 
-  public async getActiveBinId(): Promise<BinLiquidity> {
+  public async getActiveBinId() {
     const { activeId } = await this.program.account.lbPair.fetch(this.pubkey);    
     return activeId;
   }
